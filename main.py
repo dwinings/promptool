@@ -174,10 +174,7 @@ class MainWindow:
             self.color_buttons[color].show()
             self.color_buttons[color].modify_bg(gtk.STATE_NORMAL, self.color_dict[color])
             self.color_buttons[color].modify_bg(gtk.STATE_PRELIGHT, self.color_dict[color])
-            self.color_buttons[color].modify_bg(gtk.STATE_ACTIVE, self.color_dict[color])
-
-
-            gtk.STATE_ACTIVE 
+            self.color_buttons[color].modify_bg(gtk.STATE_ACTIVE, self.color_dict[color]) 
             self.color_table.attach(
                 child         = self.color_buttons[color],
                 left_attach   = (count % 4),
