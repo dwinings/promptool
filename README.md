@@ -6,7 +6,7 @@ A basic gui to make constructing a custom terminal prompt a little less soul-cru
 
 Run main.py with your python 2 interpreter. If you want to you can make main.py executable, if your python interpreter is at /usr/bin/python2. The first line can be changed for your convenience. The finished prompt can be tested by running it in the terminal, or saved by putting it in the ~/.shellrc, where shell is whatever shell you're using. (Only bash right now!).
 
-# Bugs!.
+# Bugs!
 
 If the program crashes or throws exceptions or gives off a malformed prompt (unless you fed it a weird string through copy/paste [I filter normal input]) please, let me know and file an issue
 
