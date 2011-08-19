@@ -50,7 +50,8 @@ class MainWindow:
                 'yellow'  : '(?ylw)',
                 'magenta' : '(?mgta)',
                 'cyan'    : '(?cyn)',
-                'bold'    : '(?bold)'}
+                'bold'    : '(?bold)',
+                'normal'  : '(?norm)'}
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("destroy", self.destroy)
         self.window.set_title("PyPrompt")
@@ -232,7 +233,20 @@ class MainWindow:
         self.special_combox.append_text("Pick a variable to insert!")
         self.special_combox.append_text("Username")
         self.special_combox.append_text("Hostname")
-        self.special_combox.append_text("Current Directory (Local)")
+        self.special_combox.append_text("Hostname (Long)")
+        self.special_combox.append_text("Current Directory (short)")
+        self.special_combox.append_text("Current Directory (long)")
+        self.special_combox.append_text('A $ that will be # for root')
+        self.special_combox.append_text("Date")
+        self.special_combox.append_text("Time (24-hr)")
+        self.special_combox.append_text("Time (12-hr)")
+        self.special_combox.append_text("Current Shell")
+        self.special_combox.append_text("Shell Version (short)")
+        self.special_combox.append_text("Shell Version (long)")
+        self.special_combox.append_text("Command Number (in terminal)")
+        self.special_combox.append_text("History Number")
+        self.special_combox.append_text("Number of Jobs in the Shell")
+        
         self.special_combox.set_active(0)
 
         def symbol_combox_changed_handler(widget, data=None):
@@ -240,7 +254,20 @@ class MainWindow:
                 'Pick a variable to insert!': '',
                 'Username': '(?u)',
                 'Hostname': '(?h)',
-                'Current Directory (Local)': '(?ds)'}
+                'Current Directory (short)': '(?w)',
+                'Date'    :'(?d)',
+                'Hostname (Long)' : '(?H)',
+                'Number of Jobs in the Shell' :'(?j)',
+                'Current Shell' : '(?s)',
+                'Time (24-hr)' : '(?t)',
+                'Time (12-hr)' : '(?@)',
+                'Shell Version (short)' : '(?v)',
+                'Shell Version (long)' : '(?V)',
+                'Current Directory (long)' : '(?W)',
+                'History Number' : '(?!)',
+                'Command Number (in terminal)' : r'(?#)',
+                'A $ that will be # for root' : '(?$)' }
+                
             self._return_to_text()
             self.text_entry.emit('insert_at_cursor', symbol_dict[widget.get_active_text()])
             widget.disconnect(self.symbol_combox_changed_id)

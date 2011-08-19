@@ -49,11 +49,23 @@ def make_prompt(string):
     special_escapes = {
             '(?u)' : r'\u',
             '(?h)' : r'\h',
-            '(?ds)': r'\w'}
+            '(?w)' : r'\w',
+            '(?d)' : r'\d',
+            '(?H)' : r'\H',
+            '(?j)' : r'\j',
+            '(?s)' : r'\s',
+            '(?t)'  : r'\t',
+            '(?@)'  : r'\@',
+            '(?v)'  : r'\v',
+            '(?V)'  : r'\V',
+            '(?W)' : r'\W',
+            '(?!)' : r'\!',
+           r'(?#)' : r'\#',
+            '(?$)' : r'\$' }
 
     colors = {'(?bla)', '(?red)', '(?grn)', '(?ylw)', '(?blu)', '(?mgta)', '(?cyn)', '(?wht)'}
     formats = {'(?bold)', '(?norm)'}
-    specials = {'(?u)', '(?h)', '(?ds)'}
+    specials = {'(?u)', '(?h)', '(?w)', '(?d)', '(?H)'}
     current_color = '(?bla)'
     current_style = '(?norm)'
     text_left = True
@@ -75,14 +87,14 @@ def make_prompt(string):
                 if symbol in colors:
                     current_color = symbol
                     output.append(color_escapes[(current_color, current_style)])
-                elif symbol in specials:
+                elif symbol in special_escapes:
                     output.append(special_escapes[symbol])
                 elif symbol in formats:
                     current_style = symbol
                     output.append(color_escapes[(current_color, current_style)])
 
                 else:
-                    print "Valid symbol not defined, printing plaintext"
+                    print "Valid symbol", symbol, " not defined, printing plaintext"
                     output.append(symbol)
         else:
             output.append(char[1])
