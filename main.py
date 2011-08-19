@@ -1,12 +1,27 @@
 #!/usr/bin/python2 
 
+#  promptool - A tool to create prompts for POSIX shells, written in python and GTK
+#  Copyright (C) 2011 - David Winings
+# 
+#  promptool is free software: you can redistribute it and/or modify it under the terms
+#  of the GNU General Public License as published by the Free Software Found-
+#  ation, either version 3 of the License, or (at your option) any later version.
+#
+#  promptool is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+#  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+#  PURPOSE.  See the GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License along with promptool.
+#  If not, see <http://www.gnu.org/licenses/>.
+
+
+
 from helper import * 
 import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
 import pango
-import traceback
 
 
 class MainWindow:
