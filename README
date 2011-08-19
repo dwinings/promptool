@@ -1,0 +1,7 @@
+Run main.py with your python interpreter. Output is left in the shell.
+I've done my best to prevent the special symbols to be broken or half-deleted, 
+but stuff happens. Let me know if you somehow manage to pull something off 
+(excepting copy-paste shenanigans). Later on I'll be adding more features, like
+changing the prompt entry to a TextView, which will allow me to color and bold
+the text as appropriate while typing. This is still very much a rough-around-the-edges
+endeavour, but I do hope that some of you out there will find it useful
