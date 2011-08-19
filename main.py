@@ -33,14 +33,14 @@ class MainWindow:
         pass
     def __init__(self):
         self.color_dict = {
-                'black'   : gtk.gdk.Color(0, 0, 0),
-                'red'     : gtk.gdk.Color(255, 0, 0),
-                'green'   : gtk.gdk.Color(0, 255, 0),
-                'blue'    : gtk.gdk.Color(0, 0, 255),
-                'white'   : gtk.gdk.Color(255, 255, 255),
-                'yellow'  : gtk.gdk.Color(255, 255, 0),
-                'magenta' : gtk.gdk.Color(255, 0, 255),
-                'cyan'    : gtk.gdk.Color(0, 255, 255) }
+                'black'   : gtk.gdk.Color(    0,     0,     0),
+                'red'     : gtk.gdk.Color(65535,     0,     0),
+                'green'   : gtk.gdk.Color(    0, 35553,     0),
+                'blue'    : gtk.gdk.Color(    0,     0, 65535),
+                'white'   : gtk.gdk.Color(65535, 65535, 65535),
+                'yellow'  : gtk.gdk.Color(65535, 65535,     0),
+                'magenta' : gtk.gdk.Color(65535,     0, 65535),
+                'cyan'    : gtk.gdk.Color(    0, 65535, 65535) }
         self.format_dict = {
                 'black'   : '(?bla)',
                 'red'     : '(?red)',
@@ -162,17 +162,22 @@ class MainWindow:
 
         #Lets make some closure madness
         def create_color_callback(color):
-            def color_callback(widget, Data=None):
+            def color_callback(widget, data=color):
                 self._return_to_text()
-                self.text_entry.emit('insert_at_cursor', self.format_dict[widget.get_label()])
+                self.text_entry.emit('insert_at_cursor', self.format_dict[data])
                 
             return color_callback
         
         for color in self.color_dict:
-            self.color_buttons[color] = gtk.Button(color)
+            self.color_buttons[color] = gtk.Button()
             self.color_buttons[color].connect("clicked", create_color_callback(color))
             self.color_buttons[color].show()
-            self.color_buttons[color].show()
+            self.color_buttons[color].modify_bg(gtk.STATE_NORMAL, self.color_dict[color])
+            self.color_buttons[color].modify_bg(gtk.STATE_PRELIGHT, self.color_dict[color])
+            self.color_buttons[color].modify_bg(gtk.STATE_ACTIVE, self.color_dict[color])
+
+
+            gtk.STATE_ACTIVE 
             self.color_table.attach(
                 child         = self.color_buttons[color],
                 left_attach   = (count % 4),
