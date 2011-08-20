@@ -197,8 +197,8 @@ class MainWindow:
 
     def _init_bold_btn(self):
         self.bold_btn = gtk.ToggleButton("_Bold")
-        def bold_callback(widget, data=self.bold_btn.get_active()):
-            if data:
+        def bold_callback(widget, data=None):
+            if self.bold_btn.get_active():
                 self._return_to_text()
                 self.text_entry.emit('insert_at_cursor', "(?bold)")
             else:
@@ -254,7 +254,7 @@ class MainWindow:
                 'Pick a variable to insert!': '',
                 'Username': '(?u)',
                 'Hostname': '(?h)',
-                'Current Directory (short)': '(?w)',
+                'Current Directory (short)': '(?W)',
                 'Date'    :'(?d)',
                 'Hostname (Long)' : '(?H)',
                 'Number of Jobs in the Shell' :'(?j)',
@@ -263,7 +263,7 @@ class MainWindow:
                 'Time (12-hr)' : '(?@)',
                 'Shell Version (short)' : '(?v)',
                 'Shell Version (long)' : '(?V)',
-                'Current Directory (long)' : '(?W)',
+                'Current Directory (long)' : '(?w)',
                 'History Number' : '(?!)',
                 'Command Number (in terminal)' : r'(?#)',
                 'A $ that will be # for root' : '(?$)' }
