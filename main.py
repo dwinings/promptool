@@ -62,16 +62,10 @@ class MainWindow:
     # I made a tree of _init functions :D
     def _init_main_hbox(self):
         self.main_hbox = gtk.HBox(homogeneous=False, spacing=5)
-        self.main_hbox.pack_start(self._init_main_left_alignment(), padding=5)
+        self.main_hbox.pack_start(self._init_main_left_vbox(), padding=5)
         self.main_hbox.pack_end(self._init_main_right_vbox(), expand=False, padding=5)
         self.main_hbox.show()
         return self.main_hbox
-
-    def _init_main_left_alignment(self):
-        self.main_left_alignment = gtk.Alignment(xalign=0.0, yalign=0.0, xscale=1, yscale=1.0)
-        self.main_left_alignment.add(self._init_main_left_vbox())
-        self.main_left_alignment.show()
-        return self.main_left_alignment
 
     def _init_main_left_vbox(self):
         self.main_left_vbox = gtk.VBox(homogeneous=False, spacing=10)
@@ -201,7 +195,6 @@ class MainWindow:
         self.bold_btn.connect("toggled", bold_callback)
         self.bold_btn.show()
         return self.bold_btn
-
 
     def _init_clear_btn(self):
         self.clear_btn = gtk.Button("Clear")
