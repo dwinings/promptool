@@ -61,22 +61,22 @@ class MainWindow:
 
     # I made a tree of _init functions :D
     def _init_main_hbox(self):
-        self.main_hbox = gtk.HBox()
+        self.main_hbox = gtk.HBox(homogeneous=False, spacing=5)
         self.main_hbox.pack_start(self._init_main_left_alignment(), padding=5)
-        self.main_hbox.pack_end(self._init_main_right_vbox(), padding=5)
+        self.main_hbox.pack_end(self._init_main_right_vbox(), expand=False, padding=5)
         self.main_hbox.show()
         return self.main_hbox
 
     def _init_main_left_alignment(self):
-        self.main_left_alignment = gtk.Alignment(xalign=0.0, yalign=0.0, xscale=0.8, yscale=1.0)
+        self.main_left_alignment = gtk.Alignment(xalign=0.0, yalign=0.0, xscale=1, yscale=1.0)
         self.main_left_alignment.add(self._init_main_left_vbox())
         self.main_left_alignment.show()
         return self.main_left_alignment
 
     def _init_main_left_vbox(self):
-        self.main_left_vbox = gtk.VBox()
-        self.main_left_vbox.pack_start(self._init_text_entry(), padding=5)
-        self.main_left_vbox.pack_start(self._init_left_hbox_alignment(), padding=5)
+        self.main_left_vbox = gtk.VBox(homogeneous=False, spacing=10)
+        self.main_left_vbox.pack_start(self._init_text_entry(), expand=False,  padding=10)
+        self.main_left_vbox.pack_start(self._init_format_table(), padding=5)
         self.main_left_vbox.show()
         return self.main_left_vbox
 
@@ -136,48 +136,14 @@ class MainWindow:
         self.text_entry.show()
         return self.text_entry
 
-    def _init_left_hbox_alignment(self):
-        self.left_hbox_alignment = gtk.Alignment(xalign=0.0, yalign=0.0, xscale=1.0, yscale=1.0)
-        self.left_hbox_alignment.add(self._init_left_hbox())
-        self.left_hbox_alignment.show()
-        return self.left_hbox_alignment
-
-    def _init_left_hbox(self):
-        self.left_hbox = gtk.HBox()
-        self.left_hbox.pack_start(self._init_color_align(), padding=5)
-        self.left_hbox.pack_start(self._init_misc_vbox(), padding=5)
-        self.left_hbox.show()
-        return self.left_hbox
-    
-    def _init_color_align(self):
-        self.color_align = gtk.Alignment(xalign=0.0, yalign=0.0, xscale=0.75, yscale=1.0)
-        self.color_align.add(self._init_color_table())
-        self.color_align.show()
-        return self.color_align
-    
-    #TODO: Actually make the buttons the proper colors. Maybe organize them as well... 
-    def _init_color_table(self):
-        self.color_table = gtk.Table(rows=2, columns=4, homogeneous=True)  
+    def _init_format_table(self):
+        self.color_table = gtk.Table(rows=2, columns=5, homogeneous=True)  
         self.color_buttons = {}
-        count = 0
-
-        #Lets make some closure madness
-        def create_color_callback(color):
-            def color_callback(widget, data=color):
-                self._return_to_text()
-                self.text_entry.emit('insert_at_cursor', self.format_dict[data])
-                
-            return color_callback
-        
-        for color in self.color_dict:
-            self.color_buttons[color] = gtk.Button()
-            self.color_buttons[color].connect("clicked", create_color_callback(color))
-            self.color_buttons[color].show()
-            self.color_buttons[color].modify_bg(gtk.STATE_NORMAL, self.color_dict[color])
-            self.color_buttons[color].modify_bg(gtk.STATE_PRELIGHT, self.color_dict[color])
-            self.color_buttons[color].modify_bg(gtk.STATE_ACTIVE, self.color_dict[color]) 
+        for numbered_color in enumerate(self.color_dict):
+            count = numbered_color[0]
+            color = numbered_color[1]
             self.color_table.attach(
-                child         = self.color_buttons[color],
+                child         = self._init_color_buttons(color),
                 left_attach   = (count % 4),
                 right_attach  = ((count % 4) + 1),
                 top_attach    = (count / 4),
@@ -185,15 +151,42 @@ class MainWindow:
                 xpadding      = 3,
                 ypadding      = 3)
             count += 1
+        self.color_table.attach(
+            child        = self._init_bold_btn(),
+            left_attach  = 4,
+            right_attach = 5,
+            top_attach   = 0,
+            bottom_attach= 1,
+            xpadding     = 15,
+            ypadding     = 3)
+        self.color_table.attach(
+            child        = self._init_clear_btn(),
+            left_attach  = 4,
+            right_attach = 5,
+            top_attach   = 1,
+            bottom_attach= 2,
+            xpadding     = 15,
+            ypadding     = 3)
+ 
         self.color_table.show()
         return self.color_table
 
-    def _init_misc_vbox(self):
-        self.misc_vbox = gtk.VBox()
-        self.misc_vbox.pack_start(self._init_bold_btn(), padding=3)
-        self.misc_vbox.pack_start(self._init_clear_btn(), padding=3)
-        self.misc_vbox.show()
-        return self.misc_vbox
+    def _init_color_buttons(self, color):  
+
+        #Lets make some closure madness
+        def create_color_callback(color):
+            def color_callback(widget, data=color):
+                self._return_to_text()
+                self.text_entry.emit('insert_at_cursor', self.format_dict[data])                
+            return color_callback
+
+        btn = gtk.Button()
+        btn.connect("clicked", create_color_callback(color))
+        btn.modify_bg(gtk.STATE_NORMAL, self.color_dict[color])
+        btn.modify_bg(gtk.STATE_PRELIGHT, self.color_dict[color])
+        btn.modify_bg(gtk.STATE_ACTIVE, self.color_dict[color])  
+        btn.show()
+        return btn
 
     def _init_bold_btn(self):
         self.bold_btn = gtk.ToggleButton("_Bold")
@@ -227,7 +220,6 @@ class MainWindow:
         self.main_right_vbox.show()
         return self.main_right_vbox
 
-    #TODO: Add more of the bash's variables 
     def _init_special_combox(self):
         self.special_combox = gtk.combo_box_new_text()       
         self.special_combox.append_text("Pick a variable to insert!")
