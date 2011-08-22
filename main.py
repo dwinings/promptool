@@ -26,9 +26,6 @@ import pango
 
 class MainWindow:
     
-    def destroy(self, widget, data=None):
-        gtk.main_quit()
-
     def output_prompt(self, widget, data=None):
         pass
     def __init__(self):
@@ -53,7 +50,7 @@ class MainWindow:
                 'bold'    : '(?bold)',
                 'normal'  : '(?norm)'}
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.connect("destroy", self.destroy)
+        self.window.connect("destroy", (lambda widget, data=None: gtk.main_quit()))
         self.window.set_title("PyPrompt")
         self.window.add(self._init_main_hbox())
         self.window.show()
