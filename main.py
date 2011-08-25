@@ -308,8 +308,6 @@ class MainWindow:
                             self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
                     current_change += 1
                 prompt_list.append(i[1])
-            print ''.join(prompt_list)
-            
             make_prompt(''.join(prompt_list))
         go_btn.connect("pressed", btn_handler)
         go_btn.show()
