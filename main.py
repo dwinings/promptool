@@ -286,9 +286,13 @@ class MainWindow:
         go_btn = gtk.Button("Make a Prompt!")
         def btn_handler(widget):
             text = self.text_buffer.get_text(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
+
+            #tag-state here is a list of tuples, in the form [(style, color), ... ]
+
             change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]
             style = change_list[0][1]
             color = change_list[0][2]
+            #Enumerate over a beheaded list
             for i in enumerate(self.tag_state[1:]):
                 if style != i[1][0] or color != i[1][1]:
                     style = i[1][0]
@@ -296,12 +300,12 @@ class MainWindow:
                     change_list.append((i[0]+1, style, color))
             
             prompt_list = []
-            print change_list
             current_change = 0
             for i in enumerate(text):
                 #This checks whether we've run out of changes, and will short-circuit the bad index if we have
                 if (len(change_list) != current_change) and change_list[current_change][0] == i[0]:
-                    prompt_list.append( self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
+                    prompt_list.append( 
+                            self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
                     current_change += 1
                 prompt_list.append(i[1])
             print ''.join(prompt_list)
