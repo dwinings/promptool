@@ -12,7 +12,7 @@ If the program crashes or throws exceptions or gives off a malformed prompt (unl
 
 # Unimplemented Features!
 
-Later on I'll be adding more features, like changing the prompt entry to a TextView, which will allow me to color and bold the text as appropriate while typing. I will also make the generated prompt show up in the gui somewhere, and possibly add other options. This is still a prototype of sorts, so I'm learning gtk and adding features as they occur to me, and I have time to implement them. 
+Later on I'll be adding more features, like making the generated prompt show up in the gui somewhere, and possibly add other options. This is still a prototype of sorts, so I'm learning gtk and adding features as they occur to me, and I have time to implement them. 
 
 # In Conclusion...
 
