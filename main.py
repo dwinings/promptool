@@ -29,8 +29,7 @@ class MainWindow:
     def output_prompt(self, widget, data=None):
         pass
     def __init__(self):
-        self.color_dict = {
-                'black'   : gtk.gdk.Color(    0,     0,     0),
+        self.color_dict = { 'black' : gtk.gdk.Color(0, 0, 0),
                 'red'     : gtk.gdk.Color(65535,     0,     0),
                 'green'   : gtk.gdk.Color(    0, 35553,     0),
                 'blue'    : gtk.gdk.Color(    0,     0, 65535),
@@ -38,8 +37,7 @@ class MainWindow:
                 'yellow'  : gtk.gdk.Color(65535, 65535,     0),
                 'magenta' : gtk.gdk.Color(65535,     0, 65535),
                 'cyan'    : gtk.gdk.Color(    0, 65535, 65535) }
-        self.format_dict = {
-                'black'   : '(?bla)',
+        self.format_dict = { 'black' : '(?bla)',
                 'red'     : '(?red)',
                 'green'   : '(?grn)',
                 'blue'    : '(?blu)',
@@ -48,7 +46,13 @@ class MainWindow:
                 'magenta' : '(?mgta)',
                 'cyan'    : '(?cyn)',
                 'bold'    : '(?bold)',
-                'normal'  : '(?norm)'}
+                'normal'  : '(?norm)',
+                pango.WEIGHT_NORMAL : '(?norm)',
+                pango.WEIGHT_BOLD :   '(?bold)'}
+        self.current_color = "black"
+        self.current_style = pango.WEIGHT_NORMAL
+        self.color_changed = False
+        self.tag_state = []
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("destroy", (lambda widget, data=None: gtk.main_quit()))
         self.window.set_title("PyPrompt")
@@ -66,27 +70,41 @@ class MainWindow:
 
     def _init_main_left_vbox(self):
         self.main_left_vbox = gtk.VBox(homogeneous=False, spacing=10)
-        self.main_left_vbox.pack_start(self._init_text_entry(), expand=False,  padding=10)
-        self.main_left_vbox.pack_start(self._init_format_table(), padding=5)
+        self.main_left_vbox.pack_start(self._init_text_view(),  padding=10)
+        self.main_left_vbox.pack_start(self._init_format_table(), expand=False,  padding=5)
         self.main_left_vbox.show()
         return self.main_left_vbox
 
-    def _init_text_entry(self):
-        self.text_entry = gtk.Entry()
-        self.text_entry.set_alignment(0.0)
-        #TODO: Use a Gtk.TextView instead of a Gtk.Entry 
-        def insert_handler(widget, text, length, position, data=None):
+    def _init_text_view(self):
+        self.text_view = gtk.TextView(self._init_text_buffer())
+        self.text_view.show()
+        return self.text_view
+
+    def _init_text_buffer(self):
+        def insert_handler(widget, itr, text, length, data=None):
             if len(text) == 1:
                 if text in  ("?", "\\"):
-                    widget.emit_stop_by_name("insert_text")
+                    widget.emit_stop_by_name("insert-text")
 
-        #TODO: Burn the delete handler
+            pos = itr.get_offset()
+            for x in xrange(length):
+                self.tag_state.insert(x+pos, (self.current_style, self.current_color))
+            widget.disconnect(self.insert_id)
+            tag = gtk.TextTag()
+            tag.set_property('weight', self.current_style)
+            tag.set_property('foreground', self.current_color)
+            widget.get_tag_table().add(tag)
+            widget.insert_with_tags(widget.get_end_iter(), text, tag)
+            self.insert_id = widget.connect("insert-text", insert_handler)
+            widget.emit_stop_by_name("insert-text")
+
+        def delete_handler(widget, start_itr, end_itr, data=None):
         #This has to handle deletion of entire tokens, so as to prevent malformed prompts.
-        def delete_handler(widget, start, end, data=None):
+            start = start_itr.get_offset()
+            end = end_itr.get_offset()
             start_origin = start
             end_origin = end
-            text = widget.get_text()
-            pos = widget.get_position()
+            text = widget.get_text(widget.get_start_iter(), widget.get_end_iter())
 
             def find_token(text, index, flag):
                 symbol_start = 0
@@ -115,50 +133,44 @@ class MainWindow:
                     if end <= end_origin: 
                         #print "Replacing end with", max(end-1, token[1])
                         end = max(end, token[1])
-                        
-
+            del(self.tag_state[start:end])
             widget.disconnect(self.delete_id)
-            widget.delete_text(start, end+1)
-            self.delete_id = widget.connect("delete_text", delete_handler)
-            widget.emit_stop_by_name("delete_text")
+            widget.delete(widget.get_iter_at_offset(start), widget.get_iter_at_offset(end))
+            self.delete_id = widget.connect("delete-range", delete_handler)
+            widget.emit_stop_by_name("delete-range")
 
-        self.text_entry.connect("insert_text", insert_handler)
-        self.delete_id = self.text_entry.connect("delete_text", delete_handler)
-        self.text_entry.show()
-        return self.text_entry
+        self.text_buffer = gtk.TextBuffer()
+        self.delete_id = self.text_buffer.connect('delete-range', delete_handler)
+        self.insert_id = self.text_buffer.connect('insert-text', insert_handler)
+        return self.text_buffer
 
     def _init_format_table(self):
         self.color_table = gtk.Table(rows=2, columns=5, homogeneous=True)  
-        self.color_buttons = {}
         for numbered_color in enumerate(self.color_dict):
             count = numbered_color[0]
             color = numbered_color[1]
-            self.color_table.attach(
-                child         = self._init_color_buttons(color),
+            self.color_table.attach( child = self._init_color_buttons(color),
                 left_attach   = (count % 4),
                 right_attach  = ((count % 4) + 1),
                 top_attach    = (count / 4),
                 bottom_attach = ((count / 4) + 1),
                 xpadding      = 3,
                 ypadding      = 3)
-            count += 1
-        self.color_table.attach(
-            child        = self._init_bold_btn(),
+  
+        self.color_table.attach( child = self._init_bold_btn(),
             left_attach  = 4,
             right_attach = 5,
             top_attach   = 0,
             bottom_attach= 1,
             xpadding     = 15,
             ypadding     = 3)
-        self.color_table.attach(
-            child        = self._init_clear_btn(),
+        self.color_table.attach( child = self._init_clear_btn(),
             left_attach  = 4,
             right_attach = 5,
             top_attach   = 1,
             bottom_attach= 2,
             xpadding     = 15,
-            ypadding     = 3)
- 
+            ypadding     = 3) 
         self.color_table.show()
         return self.color_table
 
@@ -168,7 +180,7 @@ class MainWindow:
         def create_color_callback(color):
             def color_callback(widget, data=color):
                 self._return_to_text()
-                self.text_entry.emit('insert_at_cursor', self.format_dict[data])                
+                self.current_color = data
             return color_callback
 
         btn = gtk.Button()
@@ -184,10 +196,10 @@ class MainWindow:
         def bold_callback(widget, data=None):
             if self.bold_btn.get_active():
                 self._return_to_text()
-                self.text_entry.emit('insert_at_cursor', "(?bold)")
+                self.current_style = pango.WEIGHT_BOLD
             else:
                 self._return_to_text()
-                self.text_entry.emit('insert_at_cursor',  '(?norm)')
+                self.current_style = pango.WEIGHT_NORMAL
 
         self.bold_btn.connect("toggled", bold_callback)
         self.bold_btn.show()
@@ -196,7 +208,8 @@ class MainWindow:
     def _init_clear_btn(self):
         self.clear_btn = gtk.Button("Clear")
         def clear_handler(widget, data=None):
-            self.text_entry.delete_text(0, self.text_entry.get_text_length())
+            self.text_buffer.delete(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
+            self.tag_state = []
             self._return_to_text()
         self.clear_btn.connect("clicked", clear_handler) 
         self.clear_btn.show()
@@ -227,13 +240,11 @@ class MainWindow:
         self.special_combox.append_text("Shell Version (long)")
         self.special_combox.append_text("Command Number (in terminal)")
         self.special_combox.append_text("History Number")
-        self.special_combox.append_text("Number of Jobs in the Shell")
-        
+        self.special_combox.append_text("Number of Jobs in the Shell")        
         self.special_combox.set_active(0)
 
         def symbol_combox_changed_handler(widget, data=None):
-            symbol_dict = {
-                'Pick a variable to insert!': '',
+            symbol_dict = { 'Pick a variable to insert!': '',
                 'Username': '(?u)',
                 'Hostname': '(?h)',
                 'Current Directory (short)': '(?W)',
@@ -251,7 +262,7 @@ class MainWindow:
                 'A $ that will be # for root' : '(?$)' }
                 
             self._return_to_text()
-            self.text_entry.emit('insert_at_cursor', symbol_dict[widget.get_active_text()])
+            self.text_view.emit('insert_at_cursor', symbol_dict[widget.get_active_text()])
             widget.disconnect(self.symbol_combox_changed_id)
             widget.set_active(0)
             self.symbol_combox_changed_id = widget.connect_after(
@@ -274,15 +285,32 @@ class MainWindow:
     def _init_go_btn(self):
         go_btn = gtk.Button("Make a Prompt!")
         def btn_handler(widget):
-            make_prompt(self.text_entry.get_text())
-        go_btn.connect("pressed", (lambda widget: make_prompt(self.text_entry.get_text())))
+            text = self.text_buffer.get_text(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
+            change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]
+            style = change_list[0][1]
+            color = change_list[0][2]
+            for i in enumerate(self.tag_state[1:]):
+                if style != i[1][0] or color != i[1][1]:
+                    style = i[1][0]
+                    color = i[1][1]
+                    change_list.append((i[0]+1, style, color))
+            
+            prompt_list = []
+            current_change = 0
+            for i in enumerate(text):
+                #This checks whether we've run out of changes, and will short-circuit the bad index if we have
+                if (len(change_list) != current_change) and change_list[current_change][0] == i[0]:
+                    prompt_list.append( self.format_dict[change_list[0][1]] + self.format_dict[change_list[0][2]])
+                    current_change += 1
+                prompt_list.append(i[1])
+            
+            make_prompt(''.join(prompt_list))
+        go_btn.connect("pressed", btn_handler)
         go_btn.show()
         return go_btn
 
     def _return_to_text(self):
-        self.text_entry.emit('focus', gtk.DIR_RIGHT)
-        l = self.text_entry.get_text_length()
-        self.text_entry.select_region(l, l)
+        self.text_view.emit('focus', gtk.DIR_RIGHT)
 
 
     def main(self):
@@ -291,3 +319,5 @@ class MainWindow:
 if __name__ == '__main__':
     window = MainWindow()
     window.main()
+
+
