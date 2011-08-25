@@ -296,13 +296,15 @@ class MainWindow:
                     change_list.append((i[0]+1, style, color))
             
             prompt_list = []
+            print change_list
             current_change = 0
             for i in enumerate(text):
                 #This checks whether we've run out of changes, and will short-circuit the bad index if we have
                 if (len(change_list) != current_change) and change_list[current_change][0] == i[0]:
-                    prompt_list.append( self.format_dict[change_list[0][1]] + self.format_dict[change_list[0][2]])
+                    prompt_list.append( self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
                     current_change += 1
                 prompt_list.append(i[1])
+            print ''.join(prompt_list)
             
             make_prompt(''.join(prompt_list))
         go_btn.connect("pressed", btn_handler)
