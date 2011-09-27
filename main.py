@@ -47,6 +47,7 @@ class MainWindow:
                 'cyan'    : '(?cyn)',
                 'bold'    : '(?bold)',
                 'normal'  : '(?norm)',
+                'reset'   : '(?reset)',
                 pango.WEIGHT_NORMAL : '(?norm)',
                 pango.WEIGHT_BOLD :   '(?bold)'}
         self.current_color = "black"
@@ -71,9 +72,16 @@ class MainWindow:
     def _init_main_left_vbox(self):
         self.main_left_vbox = gtk.VBox(homogeneous=False, spacing=10)
         self.main_left_vbox.pack_start(self._init_text_view(),  padding=10)
+        self.main_left_vbox.pack_start(self._init_fg_reset_toggle(), expand=False, padding=5)
         self.main_left_vbox.pack_start(self._init_format_table(), expand=False,  padding=5)
         self.main_left_vbox.show()
         return self.main_left_vbox
+
+    def _init_fg_reset_toggle(self):
+
+        self.fg_reset_toggle = gtk.CheckButton(label="Reset text color after prompt")
+        self.fg_reset_toggle.show()
+        return self.fg_reset_toggle
 
     def _init_text_view(self):
         self.text_view = gtk.TextView(self._init_text_buffer())
@@ -99,7 +107,10 @@ class MainWindow:
             widget.emit_stop_by_name("insert-text")
 
         def delete_handler(widget, start_itr, end_itr, data=None):
-        #This has to handle deletion of entire tokens, so as to prevent malformed prompts.
+        #This has to handle deletion of entire tokens, so as to prevent malformed prompts
+        #I should be able to delete this now that I am not using the (?) tags, but I'll
+        #keep it around a little while yet
+
             start = start_itr.get_offset()
             end = end_itr.get_offset()
             start_origin = start
@@ -286,7 +297,8 @@ class MainWindow:
         go_btn = gtk.Button("Make a Prompt!")
         def btn_handler(widget):
             text = self.text_buffer.get_text(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
-
+            if self.fg_reset_toggle.get_active():
+                text += "(?reset)"
             #tag-state here is a list of tuples, in the form [(style, color), ... ]
 
             change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]
