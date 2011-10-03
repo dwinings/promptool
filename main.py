@@ -108,8 +108,6 @@ class MainWindow:
 
         def delete_handler(widget, start_itr, end_itr, data=None):
         #This has to handle deletion of entire tokens, so as to prevent malformed prompts
-        #I should be able to delete this now that I am not using the (?) tags, but I'll
-        #keep it around a little while yet
 
             start = start_itr.get_offset()
             end = end_itr.get_offset()
