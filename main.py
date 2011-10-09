@@ -16,7 +16,8 @@
 
 
 
-from helper import * 
+from helper import *
+from preferences import *
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -227,7 +228,7 @@ class MainWindow:
     def _init_main_right_vbox(self):
         self.main_right_vbox = gtk.VBox()
         self.main_right_vbox.pack_start(self._init_special_combox(), padding=5)
-        self.main_right_vbox.pack_start(self._init_shell_combox(), padding=5)
+        self.main_right_vbox.pack_start(self._init_pref_btn(), padding=5)
         self.main_right_vbox.pack_start(self._init_go_btn(), padding=5)
         self.main_right_vbox.show()
         return self.main_right_vbox
@@ -284,12 +285,23 @@ class MainWindow:
         return self.special_combox
     
     #TODO: Add support for more shells.
-    def _init_shell_combox(self):
-        self.shell_combox = gtk.combo_box_new_text()
-        self.shell_combox.append_text("Bash Only :(")
-        self.shell_combox.set_active(0)
-        self.shell_combox.show()
-        return self.shell_combox
+#    def _init_shell_combox(self):
+#        self.shell_combox = gtk.combo_box_new_text()
+#        self.shell_combox.append_text("Bash Only :(")
+#        self.shell_combox.set_active(0)
+#        self.shell_combox.show()
+#        return self.shell_combox
+
+    def _init_pref_btn(self):
+        pref_btn = gtk.Button('_Preferences')
+        def clicked_handler(widget, data=None):
+            new_window = PrefWindow()
+            new_window.show()
+            new_window.run()
+
+        pref_btn.connect('clicked', clicked_handler)
+        pref_btn.show()
+        return pref_btn
 
     def _init_go_btn(self):
         go_btn = gtk.Button("Make a Prompt!")
