@@ -310,7 +310,8 @@ class MainWindow:
             if self.fg_reset_toggle.get_active():
                 text += "(?reset)"
             #tag-state here is a list of tuples, in the form [(style, color), ... ]
-
+            
+            if self.tag_state == []: return 
             change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]
             style = change_list[0][1]
             color = change_list[0][2]
