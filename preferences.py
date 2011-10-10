@@ -16,24 +16,38 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-class Preferences:
+class Preferences(object):
     def __init__(self):
         self.text_reset = True
         self.shell = "bash"
         self.textview_bg = gtk.gdk.Color(65535, 65535, 65535)
 
+    def set(self, pref):                       #def void set(self, Preferences pref)
+        self.text_rest = pref.text_reset       #Python's lack of optional type specifications bothers me...
+        self.shell = pref.shell
+        self.textview_bg = pref.textview_bg
+
+    def __eq__(self, pref):
+        if self.text_rest == pref.text_reset   and \
+           self.shell == pref.shell            and \
+           self.textview_bg == pref.textview_bg:
+            return True
+        else:
+            return False
+
 class PrefWindow(gtk.Dialog):
 
-    def __init__(self, parent=None, flags=0, buttons=None):
+    def __init__(self, pref_in, parent=None, flags=0, buttons=None):
         super(PrefWindow, self).__init__('Promptool: Preferences', parent, flags, buttons)
+        self.pref_global = pref_in
+        print id(self.pref_global)
+        self.pref_local = Preferences()
         self.connect("destroy", self.destroy_handler)
         self.add_button('Ok', 1)
         self.add_button('Cancel', 2)
         self.connect('response', self._response_handler)
         self._pack_vbox()
 
-    def apply_prefs(self):
-        pass
 
     def destroy_handler(self, widget, data=None):
         return False
@@ -50,7 +64,10 @@ class PrefWindow(gtk.Dialog):
 
     def _init_text_reset_toggle(self):   
         self.fg_reset_toggle = gtk.CheckButton(label="Reset text color after prompt")
-        self.fg_reset_toggle.active = True
+        self.fg_reset_toggle.active = self.pref_global.text_reset
+        def toggle_handler(widget, data=None):
+            self.pref_local.text_reset = self.fg_reset_toggle.active
+        self.fg_reset_toggle.connect('toggled', toggle_handler)
         self.fg_reset_toggle.show()
         return self.fg_reset_toggle
 
@@ -63,7 +80,7 @@ class PrefWindow(gtk.Dialog):
 
     def _response_handler(self, widget, response_id):
         if response_id == 1:
-            self.apply_prefs()
+            self.pref_global.set(self.pref_local)
             self.destroy()
         elif response_id == 2:
             self.destroy()
