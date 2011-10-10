@@ -26,11 +26,17 @@ class PrefWindow(gtk.Dialog):
 
     def __init__(self, parent=None, flags=0, buttons=None):
         super(PrefWindow, self).__init__('Promptool: Preferences', parent, flags, buttons)
-        self.connect("destroy", (lambda widget, data=None: gtk.main_quit()))
+        self.connect("destroy", self.destroy_handler)
         self.add_button('Ok', 1)
         self.add_button('Cancel', 2)
         self.connect('response', self._response_handler)
         self._pack_vbox()
+
+    def apply_prefs(self):
+        pass
+
+    def destroy_handler(self, widget, data=None):
+        return False
 
     def _pack_vbox(self):
        self.vbox.pack_start(self._init_textview_color_selector(), padding=5)
@@ -57,9 +63,10 @@ class PrefWindow(gtk.Dialog):
 
     def _response_handler(self, widget, response_id):
         if response_id == 1:
-            print 'Ok'
+            self.apply_prefs()
+            self.destroy()
         elif response_id == 2:
-            print 'Cancel'
+            self.destroy()
 
     def main(self):
         gtk.main()
