@@ -296,7 +296,6 @@ class MainWindow:
     def _init_pref_btn(self):
         pref_btn = gtk.Button('_Preferences')
         def clicked_handler(widget, data=None):
-            print id(self.preferences)
             new_window = PrefWindow(self.preferences)
             new_window.show()
             new_window.run()
@@ -311,7 +310,8 @@ class MainWindow:
             text = self.text_buffer.get_text(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
             if self.fg_reset_toggle.get_active():
                 text += "(?reset)"
-            if self.tag_state == []: return 
+            if self.tag_state == []: 
+                return 
             #tag-state here is a list of tuples, in the form [(style, color), ... ]
             
             change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]

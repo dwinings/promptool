@@ -23,7 +23,7 @@ class Preferences(object):
         self.textview_bg = gtk.gdk.Color(65535, 65535, 65535)
 
     def set(self, pref):                       #def void set(self, Preferences pref)
-        self.text_rest = pref.text_reset       #Python's lack of optional type specifications bothers me...
+        self.text_reset = pref.text_reset      #Python's lack of optional type specifications bothers me...
         self.shell = pref.shell
         self.textview_bg = pref.textview_bg
 
@@ -66,7 +66,8 @@ class PrefWindow(gtk.Dialog):
         self.fg_reset_toggle = gtk.CheckButton(label="Reset text color after prompt")
         self.fg_reset_toggle.active = self.pref_global.text_reset
         def toggle_handler(widget, data=None):
-            self.pref_local.text_reset = self.fg_reset_toggle.active
+            self.pref_local.text_reset = self.fg_reset_toggle.get_active()
+            print self.pref_local.text_reset
         self.fg_reset_toggle.connect('toggled', toggle_handler)
         self.fg_reset_toggle.show()
         return self.fg_reset_toggle
