@@ -26,43 +26,66 @@ def index_all(text, sub, start, finish):
     return l
 
 
-def make_prompt(string):
+def make_prompt(string, shell):
     color_escapes = {
-                ("(?bla)"  , "(?norm)") : r'\[\033[0;30m\]',
-                ("(?red)"    , "(?norm)") : r'\[\033[0;31m\]',
-                ("(?grn)"  , "(?norm)") : r'\[\033[0;32m\]',
-                ("(?ylw)" , "(?norm)") : r'\[\033[0;33m\]',
-                ("(?blu)"   , "(?norm)") : r'\[\033[0;34m\]',
-                ("(?mgta)", "(?norm)") : r'\[\033[0;35m\]',
-                ("(?cyn)"   , "(?norm)") : r'\[\033[0;36m\]',
-                ("(?wht)"  , "(?norm)") : r'\[\033[0;37m\]',
+                ("(?bla)"  , "(?norm)") : r'\e[0;30m',
+                ("(?red)"  , "(?norm)") : r'\e[0;31m',
+                ("(?grn)"  , "(?norm)") : r'\e[0;32m',
+                ("(?ylw)"  , "(?norm)") : r'\e[0;33m',
+                ("(?blu)"  , "(?norm)") : r'\e[0;34m',
+                ("(?mgta)" , "(?norm)") : r'\e[0;35m',
+                ("(?cyn)"  , "(?norm)") : r'\e[0;36m',
+                ("(?wht)"  , "(?norm)") : r'\e[0;37m',
 
-                ("(?bla)"  , "(?bold)") : r'\[\033[1;30m\]',
-                ("(?red)"    , "(?bold)") : r'\[\033[1;31m\]',
-                ("(?grn)"  , "(?bold)") : r'\[\033[1;32m\]',
-                ("(?ylw)" , "(?bold)") : r'\[\033[1;33m\]',
-                ("(?blu)"   , "(?bold)") : r'\[\033[1;34m\]',
-                ("(?mgta)", "(?bold)") : r'\[\033[1;35m\]',
-                ("(?cyn)"   , "(?bold)") : r'\[\033[1;36m\]',
-                ("(?wht)"  , "(?bold)") : r'\[\033[1;37m\]' }
+                ("(?bla)"  , "(?bold)") : r'\e[1;30m',
+                ("(?red)"  , "(?bold)") : r'\e[1;31m',
+                ("(?grn)"  , "(?bold)") : r'\e[1;32m',
+                ("(?ylw)"  , "(?bold)") : r'\e[1;33m',
+                ("(?blu)"  , "(?bold)") : r'\e[1;34m',
+                ("(?mgta)" , "(?bold)") : r'\e[1;35m',
+                ("(?cyn)"  , "(?bold)") : r'\e[1;36m',
+                ("(?wht)"  , "(?bold)") : r'\e[1;37m' }
 
-    special_escapes = {
-            '(?u)' : r'\u',
-            '(?h)' : r'\h',
-            '(?w)' : r'\w',
-            '(?d)' : r'\d',
-            '(?H)' : r'\H',
-            '(?j)' : r'\j',
-            '(?s)' : r'\s',
-            '(?t)' : r'\t',
-            '(?@)' : r'\@',
-            '(?v)' : r'\v',
-            '(?V)' : r'\V',
-            '(?W)' : r'\W',
-            '(?!)' : r'\!',
-           r'(?#)' : r'\#',
-            '(?$)' : r'\$',
-	 '(?reset)': r'\[\e[0m'}
+    
+    if shell == 'bash':
+        prompt_header = 'PS1=\''
+        special_escapes = {
+                '(?u)' : r'\u', #Username
+                '(?h)' : r'\h', #Hostname
+                '(?w)' : r'\w', #pwd
+                '(?d)' : r'\d', #date
+                '(?H)' : r'\H', #full hostname
+                '(?j)' : r'\j', #number of jobs managed by shell
+                '(?s)' : r'\s', #the name of the shell.
+                '(?t)' : r'\t', #current time (24h)
+                '(?@)' : r'\@', # time 12h
+                '(?v)' : r'\v', # bash version
+                '(?V)' : r'\V', # release of bash
+                '(?W)' : r'\W', # basename of pwd #POSSIBLY REMOVE
+                '(?!)' : r'\!', # history number
+               r'(?#)' : r'\#',# command number
+                '(?$)' : r'\$', # magic $
+                '(?reset)': r'\e[0m'}
+
+    elif shell == 'zsh':
+        prompt_header = 'PS1=$\''
+        special_escapes = {
+                '(?u)' : r'%n',
+                '(?h)' : r'%m',
+                '(?w)' : r'%~',
+                '(?d)' : r'%T',
+                '(?H)' : r'%M',
+                '(?j)' : r'',
+                '(?s)' : r'',
+                '(?t)' : r'',
+                '(?@)' : r'',
+                '(?v)' : r'',
+                '(?V)' : r'',
+                '(?W)' : r'%d',
+                '(?!)' : r'%!',
+               r'(?#)' : r'', #Needs research
+                '(?$)' : r'%#',
+                '(?reset)': r'\e[0m'}
 
     colors = {'(?bla)', '(?red)', '(?grn)', '(?ylw)', '(?blu)', '(?mgta)', '(?cyn)', '(?wht)'}
     formats = {'(?bold)', '(?norm)'}
@@ -71,7 +94,7 @@ def make_prompt(string):
     current_style = '(?norm)'
     text_left = True
     itr = enumerate(list(string))
-    output = ['PS1="']
+    output = [prompt_header]
     while text_left:
         char = itr.next()
         if char[1] == "(":
@@ -103,7 +126,7 @@ def make_prompt(string):
         if len(string)-1 <= char[0]:
             text_left = False
 
-    output.append('"')
+    output.append(' \'')
     print "Here's your prompt command!\nJust put it into your ~/.*rc file!\n\n", ''.join(output)
 
 
