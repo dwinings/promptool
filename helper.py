@@ -12,61 +12,22 @@
 #  You should have received a copy of the GNU General Public License along with promptool.
 #  If not, see <http://www.gnu.org/licenses/>.
 
-
+from shell import Shell
 
 def index_all(text, sub, start, finish):
     l = []
-    #print text[start:finish], sub
     text = text[start:finish]
     i = text.find(sub)
     while i > -1:
         l.append(i)
         i = text.find(sub, i+1)
-    #print l
     return l
 
 
 def make_prompt(string, shell):
-    color_escapes = {
-                ("(?bla)"  , "(?norm)") : r'\e[0;30m',
-                ("(?red)"  , "(?norm)") : r'\e[0;31m',
-                ("(?grn)"  , "(?norm)") : r'\e[0;32m',
-                ("(?ylw)"  , "(?norm)") : r'\e[0;33m',
-                ("(?blu)"  , "(?norm)") : r'\e[0;34m',
-                ("(?mgta)" , "(?norm)") : r'\e[0;35m',
-                ("(?cyn)"  , "(?norm)") : r'\e[0;36m',
-                ("(?wht)"  , "(?norm)") : r'\e[0;37m',
-
-                ("(?bla)"  , "(?bold)") : r'\e[1;30m',
-                ("(?red)"  , "(?bold)") : r'\e[1;31m',
-                ("(?grn)"  , "(?bold)") : r'\e[1;32m',
-                ("(?ylw)"  , "(?bold)") : r'\e[1;33m',
-                ("(?blu)"  , "(?bold)") : r'\e[1;34m',
-                ("(?mgta)" , "(?bold)") : r'\e[1;35m',
-                ("(?cyn)"  , "(?bold)") : r'\e[1;36m',
-                ("(?wht)"  , "(?bold)") : r'\e[1;37m' }
-
     
     if shell == 'bash':
-        prompt_header = 'PS1=\''
-        special_escapes = {
-                '(?u)' : r'\u', #Username
-                '(?h)' : r'\h', #Hostname
-                '(?w)' : r'\w', #pwd
-                '(?d)' : r'\d', #date
-                '(?H)' : r'\H', #full hostname
-                '(?j)' : r'\j', #number of jobs managed by shell
-                '(?s)' : r'\s', #the name of the shell.
-                '(?t)' : r'\t', #current time (24h)
-                '(?@)' : r'\@', # time 12h
-                '(?v)' : r'\v', # bash version
-                '(?V)' : r'\V', # release of bash
-                '(?W)' : r'\W', # basename of pwd #POSSIBLY REMOVE
-                '(?!)' : r'\!', # history number
-               r'(?#)' : r'\#',# command number
-                '(?$)' : r'\$', # magic $
-                '(?reset)': r'\e[0m'}
-
+        shell = Shell() 
     elif shell == 'zsh':
         prompt_header = 'PS1=$\''
         special_escapes = {
@@ -87,46 +48,41 @@ def make_prompt(string, shell):
                 '(?$)' : r'%#',
                 '(?reset)': r'\e[0m'}
 
-    colors = {'(?bla)', '(?red)', '(?grn)', '(?ylw)', '(?blu)', '(?mgta)', '(?cyn)', '(?wht)'}
-    formats = {'(?bold)', '(?norm)'}
-    specials = {'(?u)', '(?h)', '(?w)', '(?d)', '(?H)'}
-    current_color = '(?bla)'
-    current_style = '(?norm)'
-    text_left = True
-    itr = enumerate(list(string))
-    output = [prompt_header]
-    while text_left:
-        char = itr.next()
-        if char[1] == "(":
-            if string[char[0]+1] == "?":
-                symbol = ['(']
-                while char[1] != ')':
-                    try:
-                        char = itr.next()
-                        symbol.append(char[1])
-                    except:
-                        print "Unclosed paren, aborting... :("
-                        return
-                symbol = ''.join(symbol)
-                if symbol in colors:
-                    current_color = symbol
-                    output.append(color_escapes[(current_color, current_style)])
-                elif symbol in special_escapes:
-                    output.append(special_escapes[symbol])
-                elif symbol in formats:
-                    current_style = symbol
-                    output.append(color_escapes[(current_color, current_style)])
+    itr = iter(string)
+    output = [shell.prompt_header]
 
-                else:
-                    print "Valid symbol", symbol, " not defined, printing plaintext"
+    # Why does the python iterator not have a thing to check whether or not we have more elements...?
+    # Anyway, this littler parser I wrote is just a simple state machine.
+    try:
+        while True:
+            char = itr.next()
+            if char == "(":
+                symbol = []
+                symbol.append(char)
+                try:
+                    char = itr.next()
+                    if char == "?":
+                        symbol.append(char)
+                        while char != ')':
+                            char = itr.next()
+                            symbol.append(char)
+                        symbol = ''.join(symbol)
+                        output.append(shell.escapes[symbol])
+
+                    else:
+                        #discard invalid symbole
+                        output.append(symbol)
+                except:
                     output.append(symbol)
-        else:
-            output.append(char[1])
-
-        if len(string)-1 <= char[0]:
-            text_left = False
+            else:
+                #append non-symbol characters
+                output.append(char)
+    except:
+      pass
 
     output.append(' \'')
+
+    #TODO: Show this graphically
     print "Here's your prompt command!\nJust put it into your ~/.*rc file!\n\n", ''.join(output)
 
 

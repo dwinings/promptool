@@ -38,19 +38,26 @@ class MainWindow:
                 'yellow'  : gtk.gdk.Color(65535, 65535,     0),
                 'magenta' : gtk.gdk.Color(65535,     0, 65535),
                 'cyan'    : gtk.gdk.Color(    0, 65535, 65535) }
-        self.format_dict = { 'black' : '(?bla)',
-                'red'     : '(?red)',
-                'green'   : '(?grn)',
-                'blue'    : '(?blu)',
-                'white'   : '(?wht)',
-                'yellow'  : '(?ylw)',
-                'magenta' : '(?mgta)',
-                'cyan'    : '(?cyn)',
-                'bold'    : '(?bold)',
-                'normal'  : '(?norm)',
-                'reset'   : '(?reset)',
-                pango.WEIGHT_NORMAL : '(?norm)',
-                pango.WEIGHT_BOLD :   '(?bold)'}
+        self.format_dict = { 
+                (pango.WEIGHT_NORMAL, 'black'  ) : '(?bla)',
+                (pango.WEIGHT_NORMAL, 'red'    ) : '(?red)',
+                (pango.WEIGHT_NORMAL, 'green'  ) : '(?grn)',
+                (pango.WEIGHT_NORMAL, 'blue'   ) : '(?blu)',
+                (pango.WEIGHT_NORMAL, 'white'  ) : '(?wht)',
+                (pango.WEIGHT_NORMAL, 'yellow' ) : '(?ylw)',
+                (pango.WEIGHT_NORMAL, 'magenta') : '(?mgta)',
+                (pango.WEIGHT_NORMAL, 'cyan'   ) : '(?cyn)',
+                (pango.WEIGHT_NORMAL, 'reset'  ) : '(?reset)',
+
+                (pango.WEIGHT_BOLD, 'black'  ) : '(?bla_b)',
+                (pango.WEIGHT_BOLD, 'red'    ) : '(?red_b)',
+                (pango.WEIGHT_BOLD, 'green'  ) : '(?grn_b)',
+                (pango.WEIGHT_BOLD, 'blue'   ) : '(?blu_b)',
+                (pango.WEIGHT_BOLD, 'white'  ) : '(?wht_b)',
+                (pango.WEIGHT_BOLD, 'yellow' ) : '(?ylw_b)',
+                (pango.WEIGHT_BOLD, 'magenta') : '(?mgta_b)',
+                (pango.WEIGHT_BOLD, 'cyan'   ) : '(?cyn_b)',
+                (pango.WEIGHT_BOLD, 'reset'  ) : '(?reset)'}
         self.current_color = "black"
         self.current_style = pango.WEIGHT_NORMAL
         self.color_changed = False
@@ -337,8 +344,7 @@ class MainWindow:
             for i in enumerate(text):
                 #This checks whether we've run out of changes, and will short-circuit the bad index if we have
                 if (len(change_list) != current_change) and change_list[current_change][0] == i[0]:
-                    prompt_list.append( 
-                            self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
+                    prompt_list.append(self.format_dict[change_list[current_change][1:3]])
                     current_change += 1
                 prompt_list.append(i[1])
             make_prompt(''.join(prompt_list), self.shell)
