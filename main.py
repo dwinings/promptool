@@ -54,7 +54,10 @@ class MainWindow:
         self.current_color = "black"
         self.current_style = pango.WEIGHT_NORMAL
         self.color_changed = False
-        self.preferences = Preferences()
+
+        #self.preferences = Preferences()
+
+        self.shell = "bash"
         self.tag_state = []
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("destroy", (lambda widget, data=None: gtk.main_quit()))
@@ -229,7 +232,7 @@ class MainWindow:
     def _init_main_right_vbox(self):
         self.main_right_vbox = gtk.VBox()
         self.main_right_vbox.pack_start(self._init_special_combox(), padding=5)
-        self.main_right_vbox.pack_start(self._init_pref_btn(), padding=5)
+        self.main_right_vbox.pack_start(self._init_shell_combox(), padding=5)
         self.main_right_vbox.pack_start(self._init_go_btn(), padding=5)
         self.main_right_vbox.show()
         return self.main_right_vbox
@@ -255,6 +258,7 @@ class MainWindow:
         self.special_combox.set_active(0)
 
         def symbol_combox_changed_handler(widget, data=None):
+          #Ugh.
             symbol_dict = { 'Pick a variable to insert!': '',
                 'Username': '(?u)',
                 'Hostname': '(?h)',
@@ -285,14 +289,6 @@ class MainWindow:
         self.special_combox.show()
         return self.special_combox
     
-    #TODO: Add support for more shells.
-#    def _init_shell_combox(self):
-#        self.shell_combox = gtk.combo_box_new_text()
-#        self.shell_combox.append_text("Bash Only :(")
-#        self.shell_combox.set_active(0)
-#        self.shell_combox.show()
-#        return self.shell_combox
-
     def _init_pref_btn(self):
         pref_btn = gtk.Button('_Preferences')
         def clicked_handler(widget, data=None):
@@ -303,6 +299,18 @@ class MainWindow:
         pref_btn.connect('clicked', clicked_handler)
         pref_btn.show()
         return pref_btn
+
+    def _init_shell_combox(self):
+        self.shell_combox = gtk.combo_box_new_text()
+        self.shell_combox.append_text("Bash")
+        self.shell_combox.append_text("Zsh")
+        self.shell_combox.set_active(0)
+        def shell_combox_changed_handler(widget, data=None):
+          self.shell = widget.get_active_text().lower()
+
+        self.shell_combox.connect_after("changed", shell_combox_changed_handler)
+        self.shell_combox.show()
+        return self.shell_combox
 
     def _init_go_btn(self):
         go_btn = gtk.Button("Make a Prompt!")
@@ -333,7 +341,7 @@ class MainWindow:
                             self.format_dict[change_list[current_change][1]] + self.format_dict[change_list[current_change][2]])
                     current_change += 1
                 prompt_list.append(i[1])
-            make_prompt(''.join(prompt_list))
+            make_prompt(''.join(prompt_list), self.shell)
         go_btn.connect("pressed", btn_handler)
         go_btn.show()
         return go_btn
