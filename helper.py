@@ -12,7 +12,7 @@
 #  You should have received a copy of the GNU General Public License along with promptool.
 #  If not, see <http://www.gnu.org/licenses/>.
 
-from shell import Shell
+from shell import *
 
 def index_all(text, sub, start, finish):
     l = []
@@ -27,27 +27,9 @@ def index_all(text, sub, start, finish):
 def make_prompt(string, shell):
     
     if shell == 'bash':
-        shell = Shell() 
+        shell = bash.Bash() 
     elif shell == 'zsh':
-        prompt_header = 'PS1=$\''
-        special_escapes = {
-                '(?u)' : r'%n',
-                '(?h)' : r'%m',
-                '(?w)' : r'%~',
-                '(?d)' : r'%T',
-                '(?H)' : r'%M',
-                '(?j)' : r'',
-                '(?s)' : r'',
-                '(?t)' : r'',
-                '(?@)' : r'',
-                '(?v)' : r'',
-                '(?V)' : r'',
-                '(?W)' : r'%d',
-                '(?!)' : r'%!',
-               r'(?#)' : r'', #Needs research
-                '(?$)' : r'%#',
-                '(?reset)': r'\e[0m'}
-
+        shell = zsh.Zsh()
     itr = iter(string)
     output = [shell.prompt_header]
 
