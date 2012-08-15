@@ -3,6 +3,22 @@ from abstract import Abstract
 class Bash(Abstract):
 
     prompt_header = r'PS1=\''
+    supported_variables = [
+                    '(?u)',
+                    '(?h)',
+                    '(?w)',
+                    '(?d)',
+                    '(?h)',
+                    '(?j)',
+                    '(?s)',
+                    '(?t)',
+                    '(?@)',
+                    '(?v)',
+                    '(?v)',
+                    '(?w)',
+                    '(?!)',
+                   r'(?#)',
+                    '(?$)']
 
     def __init__(self):
         bash_escapes = {
@@ -14,7 +30,7 @@ class Bash(Abstract):
                     "(?mgta)"   : r'\[\e[0;35m\]',
                     "(?cyn)"    : r'\[\e[0;36m\]',
                     "(?wht)"    : r'\[\e[0;37m\]',
-        
+
                     "(?bla_b)"  : r'\[\e[1;30m\]',
                     "(?red_b)"  : r'\[\e[1;31m\]',
                     "(?grn_b)"  : r'\[\e[1;32m\]',
@@ -24,18 +40,18 @@ class Bash(Abstract):
                     "(?cyn_b)"  : r'\[\e[1;36m\]',
                     "(?wht_b)"  : r'\[\e[1;37m\]',
 
-                    '(?u)'      : r'\u', #Username
-                    '(?h)'      : r'\h', #Hostname
+                    '(?u)'      : r'\u', #username
+                    '(?h)'      : r'\h', #hostname
                     '(?w)'      : r'\w', #pwd
                     '(?d)'      : r'\d', #date
-                    '(?H)'      : r'\H', #full hostname
+                    '(?h)'      : r'\h', #full hostname
                     '(?j)'      : r'\j', #number of jobs managed by shell
                     '(?s)'      : r'\s', #the name of the shell.
                     '(?t)'      : r'\t', #current time (24h)
                     '(?@)'      : r'\@', # time 12h
                     '(?v)'      : r'\v', # bash version
-                    '(?V)'      : r'\V', # release of bash
-                    '(?W)'      : r'\W', # basename of pwd #POSSIBLY REMOVE
+                    '(?v)'      : r'\v', # release of bash
+                    '(?w)'      : r'\w', # basename of pwd #possibly remove
                     '(?!)'      : r'\!', # history number
                    r'(?#)'      : r'\#',# command number
                     '(?$)'      : r'\$', # magic $

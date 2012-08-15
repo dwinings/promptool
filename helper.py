@@ -12,7 +12,6 @@
 #  You should have received a copy of the GNU General Public License along with promptool.
 #  If not, see <http://www.gnu.org/licenses/>.
 
-from shell import *
 
 def index_all(text, sub, start, finish):
     l = []
@@ -25,11 +24,7 @@ def index_all(text, sub, start, finish):
 
 
 def make_prompt(string, shell):
-    
-    if shell == 'bash':
-        shell = bash.Bash() 
-    elif shell == 'zsh':
-        shell = zsh.Zsh()
+
     itr = iter(string)
     output = [shell.prompt_header]
 
@@ -65,6 +60,8 @@ def make_prompt(string, shell):
     output.append(' \'')
 
     #TODO: Show this graphically
-    print "Here's your prompt command!\nJust put it into your ~/.*rc file!\n\n", ''.join(output)
+    output = ''.join(output)
+    print "Here's your prompt command!\nJust put it into your ~/.*rc file!\n\n", output
+    return output
 
 

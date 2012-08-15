@@ -18,11 +18,13 @@
 
 from helper import *
 from preferences import *
+from shell import *
 import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
 import pango
+import dicts
 
 
 class MainWindow:
@@ -30,45 +32,17 @@ class MainWindow:
     def output_prompt(self, widget, data=None):
         pass
     def __init__(self):
-        self.color_dict = { 'black' : gtk.gdk.Color(0, 0, 0),
-                'red'     : gtk.gdk.Color(65535,     0,     0),
-                'green'   : gtk.gdk.Color(    0, 35553,     0),
-                'blue'    : gtk.gdk.Color(    0,     0, 65535),
-                'white'   : gtk.gdk.Color(65535, 65535, 65535),
-                'yellow'  : gtk.gdk.Color(65535, 65535,     0),
-                'magenta' : gtk.gdk.Color(65535,     0, 65535),
-                'cyan'    : gtk.gdk.Color(    0, 65535, 65535) }
-        self.format_dict = { 
-                (pango.WEIGHT_NORMAL, 'black'  ) : '(?bla)',
-                (pango.WEIGHT_NORMAL, 'red'    ) : '(?red)',
-                (pango.WEIGHT_NORMAL, 'green'  ) : '(?grn)',
-                (pango.WEIGHT_NORMAL, 'blue'   ) : '(?blu)',
-                (pango.WEIGHT_NORMAL, 'white'  ) : '(?wht)',
-                (pango.WEIGHT_NORMAL, 'yellow' ) : '(?ylw)',
-                (pango.WEIGHT_NORMAL, 'magenta') : '(?mgta)',
-                (pango.WEIGHT_NORMAL, 'cyan'   ) : '(?cyn)',
-                (pango.WEIGHT_NORMAL, 'reset'  ) : '(?reset)',
-
-                (pango.WEIGHT_BOLD, 'black'  ) : '(?bla_b)',
-                (pango.WEIGHT_BOLD, 'red'    ) : '(?red_b)',
-                (pango.WEIGHT_BOLD, 'green'  ) : '(?grn_b)',
-                (pango.WEIGHT_BOLD, 'blue'   ) : '(?blu_b)',
-                (pango.WEIGHT_BOLD, 'white'  ) : '(?wht_b)',
-                (pango.WEIGHT_BOLD, 'yellow' ) : '(?ylw_b)',
-                (pango.WEIGHT_BOLD, 'magenta') : '(?mgta_b)',
-                (pango.WEIGHT_BOLD, 'cyan'   ) : '(?cyn_b)',
-                (pango.WEIGHT_BOLD, 'reset'  ) : '(?reset)'}
         self.current_color = "black"
         self.current_style = pango.WEIGHT_NORMAL
         self.color_changed = False
 
         #self.preferences = Preferences()
 
-        self.shell = "bash"
+        self.shell = bash.Bash()
         self.tag_state = []
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("destroy", (lambda widget, data=None: gtk.main_quit()))
-        self.window.set_title("PyPrompt")
+        self.window.set_title("PrompTool")
         self.window.add(self._init_main_hbox())
         self.window.show()
 
@@ -101,6 +75,7 @@ class MainWindow:
         return self.text_view
 
     def _init_text_buffer(self):
+        #Fix this up
         def insert_handler(widget, itr, text, length, data=None):
             if len(text) == 1:
                 if text in  ("?", "\\"):
@@ -167,7 +142,7 @@ class MainWindow:
 
     def _init_format_table(self):
         self.color_table = gtk.Table(rows=2, columns=5, homogeneous=True)  
-        for numbered_color in enumerate(self.color_dict):
+        for numbered_color in enumerate(dicts.color_dict):
             count = numbered_color[0]
             color = numbered_color[1]
             self.color_table.attach( child = self._init_color_buttons(color),
@@ -177,7 +152,7 @@ class MainWindow:
                 bottom_attach = ((count / 4) + 1),
                 xpadding      = 3,
                 ypadding      = 3)
-  
+
         self.color_table.attach( child = self._init_bold_btn(),
             left_attach  = 4,
             right_attach = 5,
@@ -206,9 +181,9 @@ class MainWindow:
 
         btn = gtk.Button()
         btn.connect("clicked", create_color_callback(color))
-        btn.modify_bg(gtk.STATE_NORMAL, self.color_dict[color])
-        btn.modify_bg(gtk.STATE_PRELIGHT, self.color_dict[color])
-        btn.modify_bg(gtk.STATE_ACTIVE, self.color_dict[color])  
+        btn.modify_bg(gtk.STATE_NORMAL, dicts.color_dict[color])
+        btn.modify_bg(gtk.STATE_PRELIGHT, dicts.color_dict[color])
+        btn.modify_bg(gtk.STATE_ACTIVE, dicts.color_dict[color])  
         btn.show()
         return btn
 
@@ -232,7 +207,7 @@ class MainWindow:
             self.text_buffer.delete(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
             self.tag_state = []
             self._return_to_text()
-        self.clear_btn.connect("clicked", clear_handler) 
+        self.clear_btn.connect("clicked", clear_handler)
         self.clear_btn.show()
         return self.clear_btn
 
@@ -245,7 +220,8 @@ class MainWindow:
         return self.main_right_vbox
 
     def _init_special_combox(self):
-        self.special_combox = gtk.combo_box_new_text()       
+        self.special_combox = gtk.combo_box_new_text()
+        #Make this an iteration over the available keys in the current shell.
         self.special_combox.append_text("Pick a variable to insert!")
         self.special_combox.append_text("Username")
         self.special_combox.append_text("Hostname")
@@ -261,30 +237,13 @@ class MainWindow:
         self.special_combox.append_text("Shell Version (long)")
         self.special_combox.append_text("Command Number (in terminal)")
         self.special_combox.append_text("History Number")
-        self.special_combox.append_text("Number of Jobs in the Shell")        
+        self.special_combox.append_text("Number of Jobs in the Shell")
         self.special_combox.set_active(0)
 
         def symbol_combox_changed_handler(widget, data=None):
           #Ugh.
-            symbol_dict = { 'Pick a variable to insert!': '',
-                'Username': '(?u)',
-                'Hostname': '(?h)',
-                'Current Directory (short)': '(?W)',
-                'Date'    :'(?d)',
-                'Hostname (Long)' : '(?H)',
-                'Number of Jobs in the Shell' :'(?j)',
-                'Current Shell' : '(?s)',
-                'Time (24-hr)' : '(?t)',
-                'Time (12-hr)' : '(?@)',
-                'Shell Version (short)' : '(?v)',
-                'Shell Version (long)' : '(?V)',
-                'Current Directory (long)' : '(?w)',
-                'History Number' : '(?!)',
-                'Command Number (in terminal)' : r'(?#)',
-                'A $ that will be # for root' : '(?$)' }
-                
             self._return_to_text()
-            self.text_view.emit('insert_at_cursor', symbol_dict[widget.get_active_text()])
+            self.text_view.emit('insert_at_cursor', dicts.symbol_dict[widget.get_active_text()])
             widget.disconnect(self.symbol_combox_changed_id)
             widget.set_active(0)
             self.symbol_combox_changed_id = widget.connect_after(
@@ -295,7 +254,7 @@ class MainWindow:
                 symbol_combox_changed_handler)
         self.special_combox.show()
         return self.special_combox
-    
+
     def _init_pref_btn(self):
         pref_btn = gtk.Button('_Preferences')
         def clicked_handler(widget, data=None):
@@ -313,7 +272,11 @@ class MainWindow:
         self.shell_combox.append_text("Zsh")
         self.shell_combox.set_active(0)
         def shell_combox_changed_handler(widget, data=None):
-          self.shell = widget.get_active_text().lower()
+            text = widget.get_active_text().lower()
+            if text == 'bash':
+                self.shell = bash.Bash();
+            elif text == 'zsh':
+                self.shell = zsh.Zsh();
 
         self.shell_combox.connect_after("changed", shell_combox_changed_handler)
         self.shell_combox.show()
@@ -322,13 +285,16 @@ class MainWindow:
     def _init_go_btn(self):
         go_btn = gtk.Button("Make a Prompt!")
         def btn_handler(widget):
-            text = self.text_buffer.get_text(self.text_buffer.get_start_iter(), self.text_buffer.get_end_iter())
+            text = self.text_buffer.get_text(self.text_buffer.get_start_iter(),
+                                             self.text_buffer.get_end_iter())
             if self.fg_reset_toggle.get_active():
                 text += "(?reset)"
-            if self.tag_state == []: 
-                return 
-            #tag-state here is a list of tuples, in the form [(style, color), ... ]
-            
+            if self.tag_state == []:
+                return
+
+            # tag-state here is a list of tuples, in the form
+            # [(style, color), ... ]
+
             change_list = [(0, self.tag_state[0][0], self.tag_state[0][1])]
             style = change_list[0][1]
             color = change_list[0][2]
@@ -338,16 +304,22 @@ class MainWindow:
                     style = i[1][0]
                     color = i[1][1]
                     change_list.append((i[0]+1, style, color))
-            
+
             prompt_list = []
             current_change = 0
             for i in enumerate(text):
-                #This checks whether we've run out of changes, and will short-circuit the bad index if we have
+                # This checks whether we've run out of changes
+                # it will short-circuit the bad index if we have
                 if (len(change_list) != current_change) and change_list[current_change][0] == i[0]:
-                    prompt_list.append(self.format_dict[change_list[current_change][1:3]])
+                    prompt_list.append(dicts.format_dict[change_list[current_change][1:3]])
                     current_change += 1
                 prompt_list.append(i[1])
-            make_prompt(''.join(prompt_list), self.shell)
+            prompt = make_prompt(''.join(prompt_list), self.shell)
+            popup = gtk.Dialog(title='Prompt', parent=self.window, buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK))
+            popup.set_modal( True )
+            popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+            popup.connect("destroy", lambda *w: gtk.main_quit() )
+            popup.show_all()
         go_btn.connect("pressed", btn_handler)
         go_btn.show()
         return go_btn

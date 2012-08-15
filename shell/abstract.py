@@ -13,7 +13,7 @@ class Abstract:
                   "(?mgta)"   : r'\e[0;35m',
                   "(?cyn)"    : r'\e[0;36m',
                   "(?wht)"    : r'\e[0;37m',
-      
+
                   "(?bla_b)"  : r'\e[1;30m',
                   "(?red_b)"  : r'\e[1;31m',
                   "(?grn_b)"  : r'\e[1;32m',
@@ -40,5 +40,7 @@ class Abstract:
                   '(?$)'      : r'', # magic $
                   '(?reset)'  : r''
                 }
+
+  supported_variables = []
 
 
